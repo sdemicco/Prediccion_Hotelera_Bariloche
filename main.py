@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 
-background_color = "#E4F9FF"
+background_color = "#EEEEEE"
 
 # Aplicar estilos CSS a través de HTML en Markdown
 st.markdown(
@@ -67,11 +67,11 @@ nombre_dict = {
     12: 'Diciembre'
 }
 
-st.markdown('<h1 style="text-align: center; color: #0FABBC;">Predicción de Ocupación Hotelera en la Ciudad de Bariloche</h1>', unsafe_allow_html=True)
+st.markdown('<h1 style="text-align: center; color: #172774;">Predicción de Ocupación Hotelera en la Ciudad de Bariloche</h1>', unsafe_allow_html=True)
 
-#st.markdown( 'La predicción es calculada utilizando valores históricos de ocupación y el valor de interes de la palabra Bariloche obtenido de GoogleTrends del mes anterior.' )
+
 st.markdown(
-    "<p style='color: #0FABBC; font-size: 20px;'>La predicción es calculada utilizando valores históricos de ocupación y el valor de interés de la palabra Bariloche obtenido de Google Trends.</p>",
+    "<p style='color: #172774; font-size: 20px;'>La predicción es calculada utilizando valores históricos de ocupación y el valor de interés de la palabra Bariloche en Google Trends.</p>",
     unsafe_allow_html=True
 )
 
@@ -79,7 +79,37 @@ st.markdown(
 # Intervalo de confianza calculado teniendo en cuenta el error en test. 
 intervalo_confianza_test=55566.85471623692
 
-data_agrupado= pd.read_csv('data_agrupado')
+
+# generacion de dataset con trends de google
+pytrends = TrendReq(hl='es-AR', tz=180)
+kw_list = ["Bariloche"]
+pytrends.build_payload(kw_list, cat= 0 , timeframe= 'today 5-y' )
+data = pytrends.interest_over_time()
+data = data.reset_index()
+
+
+data['date'] = pd.to_datetime(data['date'])
+data['Mes']=data['date'].dt.month
+data['Anio']=data['date'].dt.year
+data_agrupado=data.groupby(['Anio','Mes'])['Bariloche'].mean().reset_index()
+
+nuevo_registro = {'Anio': anio_actual, 'Mes': mes_actual + 1 , 'Bariloche': data_agrupado['Bariloche'].iloc[-1]}
+df_nuevo_registro = pd.DataFrame([nuevo_registro])
+
+
+data_agrupado = data_agrupado.sort_values(by=['Anio', 'Mes'])
+data_agrupado['valor_mes_anterior'] = data_agrupado['Bariloche'].shift(1)
+
+mascara= data_agrupado['Anio']>2022
+data_agrupado = data_agrupado[mascara]
+
+
+# Agrego el registro para el calculo del mes siguiente
+data_agrupado = pd.concat([data_agrupado, df_nuevo_registro], ignore_index=True)
+
+#data_agrupado.to_csv('data_agrupado')
+
+#data_agrupado= pd.read_csv('data_agrupado')
 
 # mascara=(data_agrupado['Anio']==anio_actual)&(data_agrupado['Mes']==mes_actual)
 # input_modelo = data_agrupado[mascara]
@@ -111,16 +141,16 @@ ocupacion_actual = para_grafico.ocupacion_prediccion[(para_grafico['Mes'] == mes
 nombre_mes_actual = para_grafico.nombre_mes[(para_grafico['Mes'] == mes_actual + 1) & (para_grafico['Año'] == anio_actual)].values[0]
 ocupacion_actual = round(float(ocupacion_actual), 2)
 
-#st.sidebar.markdown(f"<h1 style='text-align: center; color:#893395; font-size: 40px;'>{nombre_mes_actual}</h1>", unsafe_allow_html=True)
+#st.sidebar.markdown(f"<h1 style='text-align: center; color:#FF0075; font-size: 40px;'>{nombre_mes_actual}</h1>", unsafe_allow_html=True)
 
-#st.sidebar.markdown(f"<div style='border: 1px solid #893395; padding: 10px; border-radius: 5px; text-align: center; font-size: 40px;'>{ocupacion_actual}%</div>", unsafe_allow_html=True)
+#st.sidebar.markdown(f"<div style='border: 1px solid #FF0075; padding: 10px; border-radius: 5px; text-align: center; font-size: 40px;'>{ocupacion_actual}%</div>", unsafe_allow_html=True)
 
-st.markdown(f"<h1 style='text-align: center; color:#0FABBC; font-size: 40px;'>Ocupación {nombre_mes_actual}</h1>", unsafe_allow_html=True)
-# st.markdown(f"<div style='border: 1px solid #F0F3FF; padding: 10px; border-radius: 5px; text-align: center; font-size: 40px;'>{ocupacion_actual}%</div>", unsafe_allow_html=True)
+st.markdown(f"<h1 style='text-align: center; color:#FF0075; font-size: 40px;'>Ocupación {nombre_mes_actual}</h1>", unsafe_allow_html=True)
+# st.markdown(f"<div style='border: 1px solid #FF0075; padding: 10px; border-radius: 5px; text-align: center; font-size: 40px;'>{ocupacion_actual}%</div>", unsafe_allow_html=True)
 
 st.markdown(
     f"""
-    <div style='border: 1px solid {'#12CAD6'}; padding: 10px; border-radius: 5px; text-align: center; font-size: 40px; color: #12CAD6;'>
+    <div style='border: 1px solid {'#FF0075'}; padding: 10px; border-radius: 5px; text-align: center; font-size: 40px; color: #FF0075;'>
         {ocupacion_actual}%
     </div>
     """,
@@ -141,8 +171,8 @@ para_grafico = pd.merge(para_grafico, valores_reales, on=['Año', 'Mes'], how='l
 fig, ax = plt.subplots(figsize=(10, 6))
 
 # Graficar el valor de salida
-ax.plot(para_grafico['Año'].astype(str) + '-' + para_grafico['Mes'].astype(str), para_grafico['ocupacion_prediccion'], label='Predicción', marker='o', linewidth=2, color='#12CAD6')
-ax.plot(para_grafico['Año'].astype(str) + '-' + para_grafico['Mes'].astype(str), para_grafico['ocupacion_real'], label='Real', marker='x', linewidth=2, color='#FA163F')
+ax.plot(para_grafico['Año'].astype(str) + '-' + para_grafico['Mes'].astype(str), para_grafico['ocupacion_prediccion'], label='Predicción', marker='o', linewidth=2, color='#FF0075')
+ax.plot(para_grafico['Año'].astype(str) + '-' + para_grafico['Mes'].astype(str), para_grafico['ocupacion_real'], label='Real', marker='x', linewidth=2, color='#172774')
 
 # Graficar los rangos de límite superior e inferior
 ax.fill_between(para_grafico['Año'].astype(str) + '-' + para_grafico['Mes'].astype(str), para_grafico['limite_inferior_test'], para_grafico['limite_superior_test'], color='gray', alpha=0.3, label='Intervalo de Confianza (95%)')
