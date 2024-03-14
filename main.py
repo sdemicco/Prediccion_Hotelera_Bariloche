@@ -9,6 +9,22 @@ from pytrends.request import TrendReq
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+
+background_color = "#E4F9FF"
+
+# Aplicar estilos CSS a través de HTML en Markdown
+st.markdown(
+    f"""
+    <style>
+        .stApp {{
+            background-color: {background_color};
+        }}
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+
 # importo el modelo
 model = xgb.XGBRegressor()
 model.load_model('xgb_model_turismo_5.json')
@@ -51,7 +67,14 @@ nombre_dict = {
     12: 'Diciembre'
 }
 
-st.title('Predicción de Ocupación Hotelera en la Ciudad de Bariloche')
+st.markdown('<h1 style="text-align: center; color: #0FABBC;">Predicción de Ocupación Hotelera en la Ciudad de Bariloche</h1>', unsafe_allow_html=True)
+
+#st.markdown( 'La predicción es calculada utilizando valores históricos de ocupación y el valor de interes de la palabra Bariloche obtenido de GoogleTrends del mes anterior.' )
+st.markdown(
+    "<p style='color: #0FABBC; font-size: 20px;'>La predicción es calculada utilizando valores históricos de ocupación y el valor de interés de la palabra Bariloche obtenido de Google Trends.</p>",
+    unsafe_allow_html=True
+)
+
 
 # Intervalo de confianza calculado teniendo en cuenta el error en test. 
 intervalo_confianza_test=55566.85471623692
@@ -88,11 +111,27 @@ ocupacion_actual = para_grafico.ocupacion_prediccion[(para_grafico['Mes'] == mes
 nombre_mes_actual = para_grafico.nombre_mes[(para_grafico['Mes'] == mes_actual + 1) & (para_grafico['Año'] == anio_actual)].values[0]
 ocupacion_actual = round(float(ocupacion_actual), 2)
 
-st.sidebar.markdown(f"<h1 style='text-align: center; color:#893395; font-size: 40px;'>{nombre_mes_actual}</h1>", unsafe_allow_html=True)
+#st.sidebar.markdown(f"<h1 style='text-align: center; color:#893395; font-size: 40px;'>{nombre_mes_actual}</h1>", unsafe_allow_html=True)
 
-st.sidebar.markdown(f"<div style='border: 1px solid #893395; padding: 10px; border-radius: 5px; text-align: center; font-size: 40px;'>{ocupacion_actual}%</div>", unsafe_allow_html=True)
+#st.sidebar.markdown(f"<div style='border: 1px solid #893395; padding: 10px; border-radius: 5px; text-align: center; font-size: 40px;'>{ocupacion_actual}%</div>", unsafe_allow_html=True)
+
+st.markdown(f"<h1 style='text-align: center; color:#0FABBC; font-size: 40px;'>Ocupación {nombre_mes_actual}</h1>", unsafe_allow_html=True)
+# st.markdown(f"<div style='border: 1px solid #F0F3FF; padding: 10px; border-radius: 5px; text-align: center; font-size: 40px;'>{ocupacion_actual}%</div>", unsafe_allow_html=True)
+
+st.markdown(
+    f"""
+    <div style='border: 1px solid {'#12CAD6'}; padding: 10px; border-radius: 5px; text-align: center; font-size: 40px; color: #12CAD6;'>
+        {ocupacion_actual}%
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
 
+
+
+st.markdown("")
+st.markdown("")
 
 para_grafico = pd.merge(para_grafico, valores_reales, on=['Año', 'Mes'], how='left')
 
@@ -102,8 +141,8 @@ para_grafico = pd.merge(para_grafico, valores_reales, on=['Año', 'Mes'], how='l
 fig, ax = plt.subplots(figsize=(10, 6))
 
 # Graficar el valor de salida
-ax.plot(para_grafico['Año'].astype(str) + '-' + para_grafico['Mes'].astype(str), para_grafico['ocupacion_prediccion'], label='Predicción', marker='o', linewidth=2, color='blue')
-ax.plot(para_grafico['Año'].astype(str) + '-' + para_grafico['Mes'].astype(str), para_grafico['ocupacion_real'], label='Real', marker='x', linewidth=2, color='green')
+ax.plot(para_grafico['Año'].astype(str) + '-' + para_grafico['Mes'].astype(str), para_grafico['ocupacion_prediccion'], label='Predicción', marker='o', linewidth=2, color='#12CAD6')
+ax.plot(para_grafico['Año'].astype(str) + '-' + para_grafico['Mes'].astype(str), para_grafico['ocupacion_real'], label='Real', marker='x', linewidth=2, color='#FA163F')
 
 # Graficar los rangos de límite superior e inferior
 ax.fill_between(para_grafico['Año'].astype(str) + '-' + para_grafico['Mes'].astype(str), para_grafico['limite_inferior_test'], para_grafico['limite_superior_test'], color='gray', alpha=0.3, label='Intervalo de Confianza (95%)')
