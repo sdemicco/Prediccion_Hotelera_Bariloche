@@ -1,6 +1,6 @@
 # Modelo de Predicción de Ocupación Hotelera en Bariloche
 
-Hola, mi nombre es Silvina y me gustaría presentarte un modelo que he desarrollado para predecir la ocupación hotelera en la ciudad de Bariloche.
+Hola, me gustaría presentarte un modelo que he desarrollado para predecir la ocupación hotelera en la ciudad de Bariloche.
 
 ## Importancia de la Predicción de Ocupación Hotelera
 
