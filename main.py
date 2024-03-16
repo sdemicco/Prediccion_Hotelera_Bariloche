@@ -80,19 +80,27 @@ st.markdown(
 intervalo_confianza_test=55566.85471623692
 
 
-# generacion de dataset con trends de google
-pytrends = TrendReq(hl='es-AR', tz=180)
-kw_list = ["Bariloche"]
-pytrends.build_payload(kw_list, cat= 0 , timeframe= 'today 5-y' )
-data = pytrends.interest_over_time()
-data = data.reset_index()
+# generacion de dataset con trends de google automatizado con pytrends(no funciona porque restringe la cantidad de peticiones, no es oficial de google)
 
+#pytrends = TrendReq(hl='es-AR', tz=180)
+#kw_list = ["Bariloche"]
 
+#pytrends.build_payload(kw_list, cat= 0 , timeframe= 'today 5-y' )
+#data = pytrends.interest_over_time()
+#data = data.reset_index()
+
+# Como alternativa actualizo semanalmente el archivo data.csv con valores mensuales de interes para Bariloche descargado directamente de la pagina oficial de Google trends
+
+data=pd.read_csv('data.csv', skiprows=1)
+data.rename(columns={'Semana':'date', 'Bariloche: (Todo el mundo)':'Bariloche'},inplace=True)
+
+# Agrego columnas de año y mes y agrupo para obtener los valore promedio mensuales de interes Google. 
 data['date'] = pd.to_datetime(data['date'])
 data['Mes']=data['date'].dt.month
 data['Anio']=data['date'].dt.year
 data_agrupado=data.groupby(['Anio','Mes'])['Bariloche'].mean().reset_index()
 
+# Genero un registro  para el mes siguiente de la prediccion, que usa el calor de google trends del mes actual
 nuevo_registro = {'Anio': anio_actual, 'Mes': mes_actual + 1 , 'Bariloche': data_agrupado['Bariloche'].iloc[-1]}
 df_nuevo_registro = pd.DataFrame([nuevo_registro])
 
@@ -107,18 +115,8 @@ data_agrupado = data_agrupado[mascara]
 # Agrego el registro para el calculo del mes siguiente
 data_agrupado = pd.concat([data_agrupado, df_nuevo_registro], ignore_index=True)
 
-#data_agrupado.to_csv('data_agrupado')
 
-#data_agrupado= pd.read_csv('data_agrupado')
 
-# mascara=(data_agrupado['Anio']==anio_actual)&(data_agrupado['Mes']==mes_actual)
-# input_modelo = data_agrupado[mascara]
-#input_transformado= pd.DataFrame({
-#    'valor_mes_anterior': input_modelo['Bariloche'],
-#    'Mes': input_modelo['Mes'],
-#    'Año': input_modelo['Anio']
-# })
- 
  # Genero el dataset de input para el modelo 
 input_transformado= pd.DataFrame({
     'valor_mes_anterior': data_agrupado['valor_mes_anterior'],
@@ -171,8 +169,8 @@ para_grafico = pd.merge(para_grafico, valores_reales, on=['Año', 'Mes'], how='l
 fig, ax = plt.subplots(figsize=(10, 6))
 
 # Graficar el valor de salida
-ax.plot(para_grafico['Año'].astype(str) + '-' + para_grafico['Mes'].astype(str), para_grafico['ocupacion_prediccion'], label='Predicción', marker='o', linewidth=2, color='#FF0075')
-ax.plot(para_grafico['Año'].astype(str) + '-' + para_grafico['Mes'].astype(str), para_grafico['ocupacion_real'], label='Real', marker='x', linewidth=2, color='#172774')
+ax.plot(para_grafico['Año'].astype(str) + '-' + para_grafico['Mes'].astype(str), para_grafico['ocupacion_prediccion'], label='Predicción', marker='o', linewidth=2, color='#172774')
+ax.plot(para_grafico['Año'].astype(str) + '-' + para_grafico['Mes'].astype(str), para_grafico['ocupacion_real'], label='Real', marker='x', linewidth=2, color='#FF0075')
 
 # Graficar los rangos de límite superior e inferior
 ax.fill_between(para_grafico['Año'].astype(str) + '-' + para_grafico['Mes'].astype(str), para_grafico['limite_inferior_test'], para_grafico['limite_superior_test'], color='gray', alpha=0.3, label='Intervalo de Confianza (95%)')
