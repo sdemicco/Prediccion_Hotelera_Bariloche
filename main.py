@@ -76,7 +76,7 @@ st.markdown(
 )
 
 
-# Intervalo de confianza calculado teniendo en cuenta el error en test. 
+# Intervalo de confianza calculado teniendo en cuenta el error en test ver analisis en notebook. 
 intervalo_confianza_test=55566.85471623692
 
 
@@ -157,9 +157,11 @@ st.markdown(
 
 
 
+st.markdown("")
+st.markdown("")
 
-st.markdown("")
-st.markdown("")
+
+# Genero un dataset para construir un grafico con los valores reales y predicciones
 
 para_grafico = pd.merge(para_grafico, valores_reales, on=['Año', 'Mes'], how='left')
 
