@@ -36,7 +36,7 @@ Obtuvimos excelentes resultados utilizando el XGBoostRegressor y manteniendo la 
 
 El uso de Google Trends para mejorar las predicciones resultó muy efectivo. Comparando modelos con y sin esta variable, observamos un aumento significativo en el R2, pasando de 0.42 a 0.87.
 
-## Despliegue del Modelo
+## Despliegue del Modelo en Streamlit
 
 El modelo se desplegó utilizando Streamlit y la librería pytrends para automatizar la obtención de datos de Google Trends. Puedes encontrar el enlace al modelo en la descripción de este repositorio, donde obtendrás la predicción de ocupación para el próximo mes y un gráfico histórico.
 
